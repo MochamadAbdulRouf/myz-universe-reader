@@ -1,18 +1,81 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ComicCard from "@/components/ComicCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { genres, getComicsByGenre } from "@/lib/mockData";
 import { Search } from "lucide-react";
 import { motion } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Comic {
+  id: string;
+  title: string;
+  slug: string;
+  cover_url: string | null;
+  rating: number;
+  genres: { name: string; slug: string } | null;
+}
+
+interface Genre {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 const Genre = () => {
+  const [genres, setGenres] = useState<Genre[]>([]);
+  const [comics, setComics] = useState<Comic[]>([]);
   const [selectedGenre, setSelectedGenre] = useState("Semua");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredComics = getComicsByGenre(selectedGenre).filter((comic) =>
+  useEffect(() => {
+    fetchGenres();
+    fetchComics();
+  }, []);
+
+  const fetchGenres = async () => {
+    const { data, error } = await supabase
+      .from("genres")
+      .select("*")
+      .order("name");
+
+    if (!error && data) {
+      setGenres([{ id: "all", name: "Semua", slug: "all" }, ...data]);
+    }
+  };
+
+  const fetchComics = async () => {
+    let query = supabase.from("comics").select(`
+      id,
+      title,
+      slug,
+      cover_url,
+      rating,
+      genres (name, slug)
+    `);
+
+    if (selectedGenre !== "Semua") {
+      const genre = genres.find((g) => g.name === selectedGenre);
+      if (genre) {
+        query = query.eq("genre_id", genre.id);
+      }
+    }
+
+    const { data, error } = await query.order("created_at", { ascending: false });
+
+    if (!error && data) {
+      setComics(data);
+    }
+  };
+
+  useEffect(() => {
+    if (genres.length > 0) {
+      fetchComics();
+    }
+  }, [selectedGenre, genres]);
+
+  const filteredComics = comics.filter((comic) =>
     comic.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -46,12 +109,12 @@ const Genre = () => {
           <div className="flex flex-wrap gap-2 mb-12">
             {genres.map((genre) => (
               <Button
-                key={genre}
-                variant={selectedGenre === genre ? "default" : "outline"}
-                onClick={() => setSelectedGenre(genre)}
-                className={selectedGenre === genre ? "glow-purple-sm" : ""}
+                key={genre.id}
+                variant={selectedGenre === genre.name ? "default" : "outline"}
+                onClick={() => setSelectedGenre(genre.name)}
+                className={selectedGenre === genre.name ? "glow-purple-sm" : ""}
               >
-                {genre}
+                {genre.name}
               </Button>
             ))}
           </div>
@@ -69,8 +132,8 @@ const Genre = () => {
                   <ComicCard
                     id={comic.id}
                     title={comic.title}
-                    cover={comic.cover}
-                    genre={comic.genre}
+                    cover={comic.cover_url || ""}
+                    genre={comic.genres?.name || "Unknown"}
                     rating={comic.rating}
                     slug={comic.slug}
                   />

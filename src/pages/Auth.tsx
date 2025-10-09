@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,15 +8,53 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen } from "lucide-react";
 import { motion } from "framer-motion";
+import { useAuth } from "@/lib/auth";
+import { toast } from "sonner";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [registerName, setRegisterName] = useState("");
+  const [registerEmail, setRegisterEmail] = useState("");
+  const [registerPassword, setRegisterPassword] = useState("");
+  const { signIn, signUp, user } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Authentication logic will be implemented with Lovable Cloud
-    setTimeout(() => setIsLoading(false), 1000);
+    
+    const { error } = await signIn(loginEmail, loginPassword);
+    
+    if (error) {
+      toast.error(error.message || "Login gagal");
+    } else {
+      toast.success("Login berhasil!");
+    }
+    
+    setIsLoading(false);
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    const { error } = await signUp(registerEmail, registerPassword, registerName);
+    
+    if (error) {
+      toast.error(error.message || "Registrasi gagal");
+    } else {
+      toast.success("Registrasi berhasil! Silakan login.");
+    }
+    
+    setIsLoading(false);
   };
 
   return (
@@ -52,13 +90,15 @@ const Auth = () => {
                   <CardDescription className="mb-6">
                     Login untuk melanjutkan membaca komik favoritmu
                   </CardDescription>
-                  <form onSubmit={handleSubmit} className="space-y-4">
+                  <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="email">Email</Label>
                       <Input
                         id="email"
                         type="email"
                         placeholder="nama@example.com"
+                        value={loginEmail}
+                        onChange={(e) => setLoginEmail(e.target.value)}
                         required
                       />
                     </div>
@@ -68,6 +108,8 @@ const Auth = () => {
                         id="password"
                         type="password"
                         placeholder="••••••••"
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
                         required
                       />
                     </div>
@@ -88,13 +130,15 @@ const Auth = () => {
                   <CardDescription className="mb-6">
                     Daftar untuk menikmati semua fitur Myz Universe
                   </CardDescription>
-                  <form onSubmit={handleSubmit} className="space-y-4">
+                  <form onSubmit={handleRegister} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="reg-name">Nama</Label>
                       <Input
                         id="reg-name"
                         type="text"
                         placeholder="Nama lengkap"
+                        value={registerName}
+                        onChange={(e) => setRegisterName(e.target.value)}
                         required
                       />
                     </div>
@@ -104,6 +148,8 @@ const Auth = () => {
                         id="reg-email"
                         type="email"
                         placeholder="nama@example.com"
+                        value={registerEmail}
+                        onChange={(e) => setRegisterEmail(e.target.value)}
                         required
                       />
                     </div>
@@ -113,6 +159,8 @@ const Auth = () => {
                         id="reg-password"
                         type="password"
                         placeholder="••••••••"
+                        value={registerPassword}
+                        onChange={(e) => setRegisterPassword(e.target.value)}
                         required
                       />
                     </div>
@@ -129,9 +177,6 @@ const Auth = () => {
             </Tabs>
           </Card>
 
-          <p className="text-center text-sm text-muted-foreground mt-6">
-            Backend authentication akan aktif setelah Lovable Cloud diaktifkan
-          </p>
         </motion.div>
       </div>
     </div>

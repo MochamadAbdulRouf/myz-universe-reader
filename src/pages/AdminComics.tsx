@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, Upload } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 
 interface Comic {
@@ -367,6 +367,14 @@ const AdminComics = () => {
                   </div>
                 </div>
                 <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => window.location.href = `/admin/chapters/${comic.id}`}
+                  >
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Chapters
+                  </Button>
                   <Button
                     size="sm"
                     variant="outline"

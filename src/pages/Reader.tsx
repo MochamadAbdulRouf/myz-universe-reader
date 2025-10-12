@@ -1,19 +1,103 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Home } from "lucide-react";
-import { getComicBySlug } from "@/lib/mockData";
+import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
+
+interface Comic {
+  id: string;
+  title: string;
+  slug: string;
+}
+
+interface Chapter {
+  id: string;
+  chapter_number: number;
+  title: string;
+}
+
+interface ChapterPage {
+  id: string;
+  page_number: number;
+  image_url: string;
+}
 
 const Reader = () => {
   const { slug, chapter } = useParams();
   const navigate = useNavigate();
-  const comic = getComicBySlug(slug || "");
-  const chapterNumber = parseInt(chapter || "1");
-  const currentChapter = comic?.chapters.find((c) => c.number === chapterNumber);
+  const [comic, setComic] = useState<Comic | null>(null);
+  const [currentChapter, setCurrentChapter] = useState<Chapter | null>(null);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [pages, setPages] = useState<ChapterPage[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const chapterNumber = parseInt(chapter || "1");
 
-  if (!comic || !currentChapter) {
+  useEffect(() => {
+    fetchReaderData();
+  }, [slug, chapter]);
+
+  const fetchReaderData = async () => {
+    setLoading(true);
+
+    // Fetch comic
+    const { data: comicData, error: comicError } = await supabase
+      .from("comics")
+      .select("id, title, slug")
+      .eq("slug", slug)
+      .single();
+
+    if (comicError || !comicData) {
+      setLoading(false);
+      return;
+    }
+
+    setComic(comicData);
+
+    // Fetch all chapters
+    const { data: chaptersData } = await supabase
+      .from("chapters")
+      .select("*")
+      .eq("comic_id", comicData.id)
+      .order("chapter_number", { ascending: true });
+
+    setChapters(chaptersData || []);
+
+    // Fetch current chapter
+    const { data: chapterData } = await supabase
+      .from("chapters")
+      .select("*")
+      .eq("comic_id", comicData.id)
+      .eq("chapter_number", chapterNumber)
+      .single();
+
+    if (chapterData) {
+      setCurrentChapter(chapterData);
+
+      // Fetch pages
+      const { data: pagesData } = await supabase
+        .from("chapter_pages")
+        .select("*")
+        .eq("chapter_id", chapterData.id)
+        .order("page_number", { ascending: true });
+
+      setPages(pagesData || []);
+    }
+
+    setLoading(false);
+    setCurrentPage(0);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (!comic || !currentChapter || pages.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -26,18 +110,17 @@ const Reader = () => {
     );
   }
 
-  const totalPages = currentChapter.pages.length;
+  const totalPages = pages.length;
   const hasNextPage = currentPage < totalPages - 1;
   const hasPrevPage = currentPage > 0;
-  const nextChapter = comic.chapters.find((c) => c.number === chapterNumber + 1);
-  const prevChapter = comic.chapters.find((c) => c.number === chapterNumber - 1);
+  const nextChapter = chapters.find((c) => c.chapter_number === chapterNumber + 1);
+  const prevChapter = chapters.find((c) => c.chapter_number === chapterNumber - 1);
 
   const goToNextPage = () => {
     if (hasNextPage) {
       setCurrentPage(currentPage + 1);
     } else if (nextChapter) {
-      navigate(`/baca/${slug}/${nextChapter.number}`);
-      setCurrentPage(0);
+      navigate(`/baca/${slug}/${nextChapter.chapter_number}`);
     }
   };
 
@@ -45,7 +128,7 @@ const Reader = () => {
     if (hasPrevPage) {
       setCurrentPage(currentPage - 1);
     } else if (prevChapter) {
-      navigate(`/baca/${slug}/${prevChapter.number}`);
+      navigate(`/baca/${slug}/${prevChapter.chapter_number}`);
     }
   };
 
@@ -80,7 +163,7 @@ const Reader = () => {
           className="max-w-4xl mx-auto"
         >
           <img
-            src={currentChapter.pages[currentPage]}
+            src={pages[currentPage].image_url}
             alt={`Page ${currentPage + 1}`}
             className="w-full rounded-lg shadow-2xl"
           />

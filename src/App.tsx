@@ -12,6 +12,7 @@ import Reader from "./pages/Reader";
 import Genre from "./pages/Genre";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
+import AdminChapters from "./pages/AdminChapters";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,14 @@ const App = () => (
               element={
                 <ProtectedRoute requireAdmin>
                   <Admin />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/chapters/:comicId"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminChapters />
                 </ProtectedRoute>
               }
             />

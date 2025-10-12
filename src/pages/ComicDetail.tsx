@@ -1,16 +1,98 @@
 import { useParams, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star, BookOpen, User } from "lucide-react";
-import { getComicBySlug } from "@/lib/mockData";
+import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
+
+interface Comic {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  cover_url: string | null;
+  author: string;
+  rating: number;
+  status: string;
+  genre_id: string | null;
+}
+
+interface Chapter {
+  id: string;
+  chapter_number: number;
+  title: string;
+}
+
+interface Genre {
+  name: string;
+}
 
 const ComicDetail = () => {
   const { slug } = useParams();
-  const comic = getComicBySlug(slug || "");
+  const [comic, setComic] = useState<Comic | null>(null);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [genre, setGenre] = useState<Genre | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchComicData();
+  }, [slug]);
+
+  const fetchComicData = async () => {
+    setLoading(true);
+
+    // Fetch comic
+    const { data: comicData, error: comicError } = await supabase
+      .from("comics")
+      .select("*")
+      .eq("slug", slug)
+      .single();
+
+    if (comicError || !comicData) {
+      setLoading(false);
+      return;
+    }
+
+    setComic(comicData);
+
+    // Fetch chapters
+    const { data: chaptersData } = await supabase
+      .from("chapters")
+      .select("*")
+      .eq("comic_id", comicData.id)
+      .order("chapter_number", { ascending: true });
+
+    setChapters(chaptersData || []);
+
+    // Fetch genre
+    if (comicData.genre_id) {
+      const { data: genreData } = await supabase
+        .from("genres")
+        .select("name")
+        .eq("id", comicData.genre_id)
+        .single();
+
+      setGenre(genreData);
+    }
+
+    setLoading(false);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="container mx-auto px-4 py-16 text-center">
+          <p>Loading...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!comic) {
     return (
@@ -42,7 +124,7 @@ const ComicDetail = () => {
           <div className="relative">
             <div className="sticky top-24">
               <img
-                src={comic.cover}
+                src={comic.cover_url || "/placeholder.svg"}
                 alt={comic.title}
                 className="w-full rounded-lg shadow-2xl glow-purple"
               />
@@ -60,7 +142,7 @@ const ComicDetail = () => {
                 <Star className="h-4 w-4 fill-primary text-primary" />
                 {comic.rating}
               </Badge>
-              <Badge>{comic.genre}</Badge>
+              {genre && <Badge>{genre.name}</Badge>}
               <Badge variant="outline" className="flex items-center gap-1">
                 <User className="h-3 w-3" />
                 {comic.author}
@@ -71,12 +153,14 @@ const ComicDetail = () => {
               {comic.description}
             </p>
 
-            <Button size="lg" className="glow-purple-sm mb-12" asChild>
-              <Link to={`/baca/${comic.slug}/1`}>
-                <BookOpen className="h-5 w-5 mr-2" />
-                Baca Chapter 1
-              </Link>
-            </Button>
+            {chapters.length > 0 && (
+              <Button size="lg" className="glow-purple-sm mb-12" asChild>
+                <Link to={`/baca/${comic.slug}/${chapters[0].chapter_number}`}>
+                  <BookOpen className="h-5 w-5 mr-2" />
+                  Baca Chapter {chapters[0].chapter_number}
+                </Link>
+              </Button>
+            )}
 
             {/* Chapters List */}
             <Card>
@@ -88,24 +172,30 @@ const ComicDetail = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {comic.chapters.map((chapter) => (
-                    <Link
-                      key={chapter.id}
-                      to={`/baca/${comic.slug}/${chapter.number}`}
-                    >
-                      <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:border-primary hover:bg-card/50 transition-all cursor-pointer hover-glow">
-                        <div>
-                          <p className="font-semibold">
-                            Chapter {chapter.number}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {chapter.title}
-                          </p>
+                  {chapters.length > 0 ? (
+                    chapters.map((chapter) => (
+                      <Link
+                        key={chapter.id}
+                        to={`/baca/${comic.slug}/${chapter.chapter_number}`}
+                      >
+                        <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:border-primary hover:bg-card/50 transition-all cursor-pointer hover-glow">
+                          <div>
+                            <p className="font-semibold">
+                              Chapter {chapter.chapter_number}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {chapter.title}
+                            </p>
+                          </div>
+                          <BookOpen className="h-5 w-5 text-muted-foreground" />
                         </div>
-                        <BookOpen className="h-5 w-5 text-muted-foreground" />
-                      </div>
-                    </Link>
-                  ))}
+                      </Link>
+                    ))
+                  ) : (
+                    <p className="text-center text-muted-foreground py-8">
+                      Belum ada chapter tersedia
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>

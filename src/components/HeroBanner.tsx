@@ -37,13 +37,26 @@ const HeroBanner = () => {
   }, []);
 
   const fetchFeaturedComic = async () => {
-    // Fetch the latest comic
-    const { data: comicData, error: comicError } = await supabase
+    // Fetch the featured comic, or fallback to latest comic
+    let { data: comicData, error: comicError } = await supabase
       .from("comics")
       .select("*")
-      .order("created_at", { ascending: false })
+      .eq("featured", true)
       .limit(1)
-      .single();
+      .maybeSingle();
+
+    // If no featured comic, get the latest one
+    if (!comicData) {
+      const { data: latestComic, error: latestError } = await supabase
+        .from("comics")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      comicData = latestComic;
+      comicError = latestError;
+    }
 
     if (comicError || !comicData) {
       setLoading(false);

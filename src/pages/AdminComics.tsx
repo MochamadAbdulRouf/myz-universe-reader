@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, Upload, BookOpen } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Plus, Pencil, Trash2, Upload, BookOpen, Star } from "lucide-react";
 import { toast } from "sonner";
 
 interface Comic {
@@ -20,6 +21,7 @@ interface Comic {
   rating: number;
   status: string;
   genre_id: string | null;
+  featured: boolean;
 }
 
 interface Genre {
@@ -148,6 +150,34 @@ const AdminComics = () => {
     }
 
     toast.success("Comic deleted!");
+    fetchComics();
+  };
+
+  const handleToggleFeatured = async (comic: Comic) => {
+    // If setting as featured, remove featured from all other comics first
+    if (!comic.featured) {
+      const { error: unfeaturedError } = await supabase
+        .from("comics")
+        .update({ featured: false })
+        .neq("id", comic.id);
+
+      if (unfeaturedError) {
+        toast.error("Error updating featured status");
+        return;
+      }
+    }
+
+    const { error } = await supabase
+      .from("comics")
+      .update({ featured: !comic.featured })
+      .eq("id", comic.id);
+
+    if (error) {
+      toast.error("Error updating featured status");
+      return;
+    }
+
+    toast.success(comic.featured ? "Removed from featured" : "Set as featured!");
     fetchComics();
   };
 
@@ -352,11 +382,16 @@ const AdminComics = () => {
                   />
                 )}
                 <div className="flex-1">
-                  <h3 className="font-bold text-lg">{comic.title}</h3>
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="font-bold text-lg">{comic.title}</h3>
+                    {comic.featured && (
+                      <Star className="h-5 w-5 fill-primary text-primary" />
+                    )}
+                  </div>
                   <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                     {comic.description}
                   </p>
-                  <div className="flex gap-2 text-sm">
+                  <div className="flex gap-2 text-sm mb-3">
                     <span className="text-muted-foreground">
                       Author: {comic.author}
                     </span>
@@ -364,6 +399,19 @@ const AdminComics = () => {
                     <span className="text-primary">Rating: {comic.rating}</span>
                     <span>•</span>
                     <span className="capitalize">{comic.status}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={comic.featured}
+                      onCheckedChange={() => handleToggleFeatured(comic)}
+                      id={`featured-${comic.id}`}
+                    />
+                    <Label 
+                      htmlFor={`featured-${comic.id}`}
+                      className="text-sm cursor-pointer"
+                    >
+                      Featured
+                    </Label>
                   </div>
                 </div>
                 <div className="flex gap-2">

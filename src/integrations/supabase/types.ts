@@ -87,6 +87,7 @@ export type Database = {
           cover_url: string | null
           created_at: string
           description: string
+          featured: boolean
           genre_id: string | null
           id: string
           rating: number
@@ -100,6 +101,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           description: string
+          featured?: boolean
           genre_id?: string | null
           id?: string
           rating?: number
@@ -113,6 +115,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           description?: string
+          featured?: boolean
           genre_id?: string | null
           id?: string
           rating?: number

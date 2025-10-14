@@ -2,6 +2,8 @@ import { Link, useLocation } from "react-router-dom";
 import { BookOpen, Home, Grid3x3, LogIn, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
+// Import logo dari assets
+import logoImage from "@/assets/logo.png";
 
 const Navbar = () => {
   const location = useLocation();
@@ -15,12 +17,16 @@ const Navbar = () => {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 group">
-            <BookOpen className="h-8 w-8 text-primary group-hover:glow-purple-sm transition-all" />
+              <img 
+              src={logoImage} 
+              alt="Myz Universe Logo" 
+              className="h-14 w-14 transition-all group-hover:glow-purple-sm" 
+              />
             <span className="text-2xl font-bold bg-gradient-to-r from-primary via-purple-400 to-primary bg-clip-text text-transparent">
               Myz Universe
             </span>
           </Link>
-
+    
           {/* Navigation */}
           <div className="flex items-center gap-1 md:gap-2">
             <Button

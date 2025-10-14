@@ -52,7 +52,7 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How To Containerization this
+## How To Containerization this Application
 
 1. Create Dockerfile After following the steps above
 ```bash

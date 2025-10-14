@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Pencil, Trash2, Upload, BookOpen, Star } from "lucide-react";
 import { toast } from "sonner";
 
@@ -18,10 +19,12 @@ interface Comic {
   description: string;
   cover_url: string | null;
   author: string;
+  artist: string | null;
   rating: number;
   status: string;
   genre_id: string | null;
   featured: boolean;
+  genres?: Genre[];
 }
 
 interface Genre {
@@ -39,10 +42,11 @@ const AdminComics = () => {
     title: "",
     slug: "",
     description: "",
-    author: "Myz Creator",
+    author: "",
+    artist: "",
     rating: "0",
     status: "ongoing",
-    genre_id: "",
+    genre_ids: [] as string[],
   });
   const [coverFile, setCoverFile] = useState<File | null>(null);
 
@@ -54,7 +58,10 @@ const AdminComics = () => {
   const fetchComics = async () => {
     const { data, error } = await supabase
       .from("comics")
-      .select("*")
+      .select(`
+        *,
+        comic_genres(genre_id, genres(id, name, slug))
+      `)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -62,7 +69,13 @@ const AdminComics = () => {
       return;
     }
 
-    setComics(data || []);
+    // Transform the data to include genres array
+    const comicsWithGenres = data?.map((comic: any) => ({
+      ...comic,
+      genres: comic.comic_genres?.map((cg: any) => cg.genres).filter(Boolean) || []
+    })) || [];
+
+    setComics(comicsWithGenres);
   };
 
   const fetchGenres = async () => {
@@ -81,6 +94,12 @@ const AdminComics = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate at least author or artist is provided
+    if (!formData.author.trim() && !formData.artist.trim()) {
+      toast.error("Harap isi Author atau Artist (atau keduanya)");
+      return;
+    }
 
     let coverUrl = editingComic?.cover_url || null;
 
@@ -106,10 +125,17 @@ const AdminComics = () => {
     }
 
     const comicData = {
-      ...formData,
+      title: formData.title,
+      slug: formData.slug,
+      description: formData.description,
+      author: formData.author || "Unknown",
+      artist: formData.artist || null,
       rating: parseFloat(formData.rating),
+      status: formData.status,
       cover_url: coverUrl,
     };
+
+    let comicId = editingComic?.id;
 
     if (editingComic) {
       const { error } = await supabase
@@ -122,18 +148,44 @@ const AdminComics = () => {
         return;
       }
 
-      toast.success("Comic updated!");
+      // Delete existing genre relationships
+      await supabase
+        .from("comic_genres")
+        .delete()
+        .eq("comic_id", editingComic.id);
     } else {
-      const { error } = await supabase.from("comics").insert([comicData]);
+      const { data: newComic, error } = await supabase
+        .from("comics")
+        .insert([comicData])
+        .select()
+        .single();
 
       if (error) {
         toast.error("Error creating comic");
         return;
       }
 
-      toast.success("Comic created!");
+      comicId = newComic.id;
     }
 
+    // Insert genre relationships
+    if (formData.genre_ids.length > 0 && comicId) {
+      const genreRelations = formData.genre_ids.map(genreId => ({
+        comic_id: comicId,
+        genre_id: genreId
+      }));
+
+      const { error: genreError } = await supabase
+        .from("comic_genres")
+        .insert(genreRelations);
+
+      if (genreError) {
+        toast.error("Error saving genres");
+        return;
+      }
+    }
+
+    toast.success(editingComic ? "Comic updated!" : "Comic created!");
     setIsDialogOpen(false);
     resetForm();
     fetchComics();
@@ -188,9 +240,10 @@ const AdminComics = () => {
       slug: comic.slug,
       description: comic.description,
       author: comic.author,
+      artist: comic.artist || "",
       rating: comic.rating.toString(),
       status: comic.status,
-      genre_id: comic.genre_id || "",
+      genre_ids: comic.genres?.map(g => g.id) || [],
     });
     setIsDialogOpen(true);
   };
@@ -201,10 +254,11 @@ const AdminComics = () => {
       title: "",
       slug: "",
       description: "",
-      author: "Myz Creator",
+      author: "",
+      artist: "",
       rating: "0",
       status: "ongoing",
-      genre_id: "",
+      genre_ids: [],
     });
     setCoverFile(null);
   };
@@ -271,74 +325,100 @@ const AdminComics = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="author">Author</Label>
+                  <Label htmlFor="author">Author (Penulis)</Label>
                   <Input
                     id="author"
+                    placeholder="Nama penulis cerita"
                     value={formData.author}
                     onChange={(e) =>
                       setFormData({ ...formData, author: e.target.value })
                     }
-                    required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="rating">Rating (0-5)</Label>
+                  <Label htmlFor="artist">Artist (Ilustrator)</Label>
                   <Input
-                    id="rating"
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="5"
-                    value={formData.rating}
+                    id="artist"
+                    placeholder="Nama ilustrator"
+                    value={formData.artist}
                     onChange={(e) =>
-                      setFormData({ ...formData, rating: e.target.value })
+                      setFormData({ ...formData, artist: e.target.value })
                     }
-                    required
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="genre">Genre</Label>
-                  <Select
-                    value={formData.genre_id}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, genre_id: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih genre" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {genres.map((genre) => (
-                        <SelectItem key={genre.id} value={genre.id}>
-                          {genre.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <p className="text-sm text-muted-foreground -mt-2">
+                * Isi minimal salah satu (Author atau Artist)
+              </p>
 
-                <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
-                  <Select
-                    value={formData.status}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, status: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ongoing">Ongoing</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="hiatus">Hiatus</SelectItem>
-                    </SelectContent>
-                  </Select>
+              <div className="space-y-2">
+                <Label htmlFor="rating">Rating (0-5)</Label>
+                <Input
+                  id="rating"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="5"
+                  value={formData.rating}
+                  onChange={(e) =>
+                    setFormData({ ...formData, rating: e.target.value })
+                  }
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Genre (Pilih satu atau lebih)</Label>
+                <div className="border rounded-lg p-4 space-y-3 max-h-48 overflow-y-auto">
+                  {genres.map((genre) => (
+                    <div key={genre.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`genre-${genre.id}`}
+                        checked={formData.genre_ids.includes(genre.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setFormData({
+                              ...formData,
+                              genre_ids: [...formData.genre_ids, genre.id]
+                            });
+                          } else {
+                            setFormData({
+                              ...formData,
+                              genre_ids: formData.genre_ids.filter(id => id !== genre.id)
+                            });
+                          }
+                        }}
+                      />
+                      <Label
+                        htmlFor={`genre-${genre.id}`}
+                        className="text-sm font-normal cursor-pointer"
+                      >
+                        {genre.name}
+                      </Label>
+                    </div>
+                  ))}
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, status: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ongoing">Ongoing</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="hiatus">Hiatus</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
@@ -391,11 +471,33 @@ const AdminComics = () => {
                   <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                     {comic.description}
                   </p>
+                  <div className="flex flex-wrap gap-2 text-sm mb-2">
+                    {comic.author && (
+                      <>
+                        <span className="text-muted-foreground">
+                          Author: {comic.author}
+                        </span>
+                        {comic.artist && <span>•</span>}
+                      </>
+                    )}
+                    {comic.artist && (
+                      <span className="text-muted-foreground">
+                        Artist: {comic.artist}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-sm mb-2">
+                    {comic.genres && comic.genres.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {comic.genres.map((genre, index) => (
+                          <span key={genre.id} className="text-primary">
+                            {genre.name}{index < comic.genres!.length - 1 ? ',' : ''}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                   <div className="flex gap-2 text-sm mb-3">
-                    <span className="text-muted-foreground">
-                      Author: {comic.author}
-                    </span>
-                    <span>•</span>
                     <span className="text-primary">Rating: {comic.rating}</span>
                     <span>•</span>
                     <span className="capitalize">{comic.status}</span>

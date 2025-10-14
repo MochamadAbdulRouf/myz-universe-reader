@@ -81,8 +81,45 @@ export type Database = {
           },
         ]
       }
+      comic_genres: {
+        Row: {
+          comic_id: string
+          created_at: string
+          genre_id: string
+          id: string
+        }
+        Insert: {
+          comic_id: string
+          created_at?: string
+          genre_id: string
+          id?: string
+        }
+        Update: {
+          comic_id?: string
+          created_at?: string
+          genre_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comic_genres_comic_id_fkey"
+            columns: ["comic_id"]
+            isOneToOne: false
+            referencedRelation: "comics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comic_genres_genre_id_fkey"
+            columns: ["genre_id"]
+            isOneToOne: false
+            referencedRelation: "genres"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comics: {
         Row: {
+          artist: string | null
           author: string
           cover_url: string | null
           created_at: string
@@ -97,6 +134,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          artist?: string | null
           author?: string
           cover_url?: string | null
           created_at?: string
@@ -111,6 +149,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          artist?: string | null
           author?: string
           cover_url?: string | null
           created_at?: string

@@ -16,10 +16,9 @@ interface Comic {
   description: string;
   cover_url: string | null;
   author: string;
-  artist: string | null;
   rating: number;
   status: string;
-  comic_genres: { genres: { name: string } }[];
+  genre_id: string | null;
 }
 
 interface Chapter {
@@ -28,10 +27,15 @@ interface Chapter {
   title: string;
 }
 
+interface Genre {
+  name: string;
+}
+
 const ComicDetail = () => {
   const { slug } = useParams();
   const [comic, setComic] = useState<Comic | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [genre, setGenre] = useState<Genre | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,17 +45,10 @@ const ComicDetail = () => {
   const fetchComicData = async () => {
     setLoading(true);
 
-    // Fetch comic with genres
+    // Fetch comic
     const { data: comicData, error: comicError } = await supabase
       .from("comics")
-      .select(`
-        *,
-        comic_genres (
-          genres (
-            name
-          )
-        )
-      `)
+      .select("*")
       .eq("slug", slug)
       .single();
 
@@ -70,6 +67,18 @@ const ComicDetail = () => {
       .order("chapter_number", { ascending: true });
 
     setChapters(chaptersData || []);
+
+    // Fetch genre
+    if (comicData.genre_id) {
+      const { data: genreData } = await supabase
+        .from("genres")
+        .select("name")
+        .eq("id", comicData.genre_id)
+        .single();
+
+      setGenre(genreData);
+    }
+
     setLoading(false);
   };
 
@@ -133,19 +142,11 @@ const ComicDetail = () => {
                 <Star className="h-4 w-4 fill-primary text-primary" />
                 {comic.rating}
               </Badge>
-              {comic.comic_genres?.map((cg, index) => (
-                <Badge key={index}>{cg.genres.name}</Badge>
-              ))}
+              {genre && <Badge>{genre.name}</Badge>}
               <Badge variant="outline" className="flex items-center gap-1">
                 <User className="h-3 w-3" />
-                Author: {comic.author}
+                {comic.author}
               </Badge>
-              {comic.artist && (
-                <Badge variant="outline" className="flex items-center gap-1">
-                  <User className="h-3 w-3" />
-                  Artist: {comic.artist}
-                </Badge>
-              )}
             </div>
 
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">

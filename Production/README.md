@@ -63,14 +63,14 @@ kubectl get all
 
 ## Documentation
 
-1. Eksekusi file konfig
+1. File konfigurasi di eksekusi menggunakan command kubectl apply
 ```bash
 controlplane ~/Production ➜  kubectl apply -f comic-deployment.yaml 
 deployment.apps/comic-deployment created
 service/comic-service created
 ```
 
-2. Cek apakah Deployment dan Service berjalan
+2. Verifikasi apakah Deployment dan Service berjalan
 ```bash
 controlplane ~/Production ➜  kubectl get all
 NAME                                   READY   STATUS    RESTARTS   AGE
@@ -89,8 +89,11 @@ NAME                                         DESIRED   CURRENT   READY   AGE
 replicaset.apps/comic-deployment-7c8bb954d   3         3         3       35s
 ```
 
-3. Akses ke Port 30002, Untuk Port EXTERNAL dari Node Port
+3. Aplikasi di akses melalui browser menggunakan Port EXTERNAL 30002
 ![image-documentation-1](./image/image.png)
 
-4. Login menggunakan user admin yang ada di Lovable Cloud
+4. Verifikasi Koneksi Database, Dengan cara login ke website menggunakan akun admin.Aplikasi ini terhubung ke database External yang di kelola oleh Lovable Cloud (Berbasis Supabase), Keberhasilan login sebagai Admin menunjukan bahwa Pod didalam Cluster Kubernetes memiliki koneksi ke layanan database external.
 ![image-documentation-2](./image/image2.png)
+
+
+gacorr cuyy anak IT banget

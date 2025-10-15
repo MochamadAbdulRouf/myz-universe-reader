@@ -14,7 +14,7 @@ interface Comic {
   slug: string;
   cover_url: string | null;
   rating: number;
-  genres: { name: string; slug: string } | null;
+  comic_genres: { genres: { name: string; slug: string } }[];
 }
 
 interface Genre {
@@ -52,20 +52,26 @@ const Genre = () => {
       slug,
       cover_url,
       rating,
-      genres (name, slug)
+      comic_genres (
+        genres (
+          name,
+          slug
+        )
+      )
     `);
-
-    if (selectedGenre !== "Semua") {
-      const genre = genres.find((g) => g.name === selectedGenre);
-      if (genre) {
-        query = query.eq("genre_id", genre.id);
-      }
-    }
 
     const { data, error } = await query.order("created_at", { ascending: false });
 
     if (!error && data) {
-      setComics(data);
+      // Filter by genre if needed
+      if (selectedGenre !== "Semua") {
+        const filtered = data.filter(comic => 
+          comic.comic_genres?.some(cg => cg.genres.name === selectedGenre)
+        );
+        setComics(filtered);
+      } else {
+        setComics(data);
+      }
     }
   };
 
@@ -133,7 +139,7 @@ const Genre = () => {
                     id={comic.id}
                     title={comic.title}
                     cover={comic.cover_url || ""}
-                    genre={comic.genres?.name || "Unknown"}
+                    genres={comic.comic_genres?.map(cg => cg.genres.name) || []}
                     rating={comic.rating}
                     slug={comic.slug}
                   />

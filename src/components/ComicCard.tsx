@@ -8,12 +8,12 @@ interface ComicCardProps {
   id: string;
   title: string;
   cover: string;
-  genre: string;
+  genres: string[];
   rating: number;
   slug: string;
 }
 
-const ComicCard = ({ id, title, cover, genre, rating, slug }: ComicCardProps) => {
+const ComicCard = ({ id, title, cover, genres, rating, slug }: ComicCardProps) => {
   return (
     <motion.div
       whileHover={{ scale: 1.05 }}
@@ -36,7 +36,15 @@ const ComicCard = ({ id, title, cover, genre, rating, slug }: ComicCardProps) =>
           </div>
           <CardContent className="p-4">
             <h3 className="font-semibold text-lg line-clamp-1 mb-1">{title}</h3>
-            <Badge variant="outline">{genre}</Badge>
+            <div className="flex flex-wrap gap-1">
+              {genres.length > 0 ? (
+                genres.map((genre, index) => (
+                  <Badge key={index} variant="outline">{genre}</Badge>
+                ))
+              ) : (
+                <Badge variant="outline">Unknown</Badge>
+              )}
+            </div>
           </CardContent>
         </Card>
       </Link>

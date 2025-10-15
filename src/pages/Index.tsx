@@ -12,7 +12,7 @@ interface Comic {
   slug: string;
   cover_url: string | null;
   rating: number;
-  genres: { name: string } | null;
+  comic_genres: { genres: { name: string } }[];
 }
 
 const Index = () => {
@@ -31,7 +31,11 @@ const Index = () => {
         slug,
         cover_url,
         rating,
-        genres (name)
+        comic_genres (
+          genres (
+            name
+          )
+        )
       `)
       .order("created_at", { ascending: false })
       .limit(8);
@@ -72,7 +76,7 @@ const Index = () => {
                     id={comic.id}
                     title={comic.title}
                     cover={comic.cover_url || ""}
-                    genre={comic.genres?.name || "Unknown"}
+                    genres={comic.comic_genres?.map(cg => cg.genres.name) || []}
                     rating={comic.rating}
                     slug={comic.slug}
                   />

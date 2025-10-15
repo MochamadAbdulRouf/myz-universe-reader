@@ -10,6 +10,7 @@ import { BookOpen } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import logoImage from "@/assets/logo.png";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -67,9 +68,13 @@ const Auth = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="w-full max-w-md"
-        >
+          >
           <div className="text-center mb-8">
-            <BookOpen className="h-12 w-12 text-primary mx-auto mb-4 glow-purple-sm" />
+             <center><img 
+              src={logoImage} 
+              alt="Myz Universe Logo" 
+              className="h-20 w-20 transition-all group-hover:glow-purple-sm"/>
+              </center>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-purple-400 to-primary bg-clip-text text-transparent">
               Myz Universe
             </h1>

@@ -20,13 +20,13 @@ const Navbar = () => {
               <img 
               src={logoImage} 
               alt="Myz Universe Logo" 
-              className="h-14 w-14 transition-all group-hover:glow-purple-sm" 
+              className="h-10 w-10 transition-all group-hover:glow-purple-sm" 
               />
             <span className="text-2xl font-bold bg-gradient-to-r from-primary via-purple-400 to-primary bg-clip-text text-transparent">
               Myz Universe
             </span>
           </Link>
-    
+
           {/* Navigation */}
           <div className="flex items-center gap-1 md:gap-2">
             <Button

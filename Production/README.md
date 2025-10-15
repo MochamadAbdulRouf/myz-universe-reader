@@ -59,7 +59,7 @@ kubectl apply -f comic-deployment.yaml
 kubectl get all
 ```
 
-5. Karena saya menggunakan Type Service Node Port maka saya akan akses ke Port 30002 seperti di file konfig saya, Untuk layanan Kubernetes saya menggunakan Playground KodeKloud untuk melakukan uji coba Production dan Implementasi sederhana. Visit ke website ini guys free main kubernetes buat device yang ga kuat https://kodekloud.com/studio/playgrounds/kubernetes/
+5. Pengujian saya akses ke EXTERNAL Port 30002 di file manifes, Untuk layanan Kubernetes saya menggunakan Playground KodeKloud untuk melakukan uji coba Production dan Implementasi sederhana. Visit ke website ini guys free main kubernetes buat device yang ga kuat https://kodekloud.com/studio/playgrounds/kubernetes/
 
 ## Documentation
 

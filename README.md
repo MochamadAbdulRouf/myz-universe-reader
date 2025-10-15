@@ -95,13 +95,16 @@ docker run -d -p 8080:8080 --name name-container yourname/nameyourapp:tag
 
 1. Pull my image
 ```bash
-docker pull mochabdulrouf/react-comic-app:1.0
+docker pull mochabdulrouf/react-comic-app:2.0-development
 ```
 
 2. Run the container 
 ```bash
-docker run -d -p 8080:8080 --name name-container mochabdulrouf/react-comic-app:1.0
+docker run -d -p 8080:8080 --name name-container mochabdulrouf/react-comic-app:2.0-development
 ```
+
+### Visit to Production for my Kubernetes Project
+https://github.com/MochamadAbdulRouf/myz-universe-reader/tree/main/Production 
 
 EST. 2025 
 

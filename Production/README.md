@@ -19,7 +19,7 @@ note: kode aplikasi di kelola oleh Ai Lovable dan Saya
 2. Deployment Workflow
 Berikut rincian bagaimana saya melakukan management proyek ini.
 
-- Containerization: Aplikasi dikemas sebagai image Docker menggunakan Dockerfile dengan pendekatan multi-stage build untuk optimasi ukuran dan keamanan.
+- Containerization: Aplikasi dikemas sebagai image Docker menggunakan Dockerfile dengan menggunakan multi-stage build untuk optimasi ukuran dan keamanan.
 
 - Tahap Build: Tahap pertama (builder) di dalam Dockerfile menggunakan base image node:18-alpine. Tahap ini bertanggung jawab untuk menginstal dependensi dan mengkompilasi aplikasi TypeScript/React menjadi aset statis (HTML, CSS, JS) di dalam direktori /dist.
 
@@ -33,13 +33,13 @@ Berikut rincian bagaimana saya melakukan management proyek ini.
 
 note berikut nama repository Docker Hub saya: https://hub.docker.com/u/mochabdulrouf
 
-Manifes Kubernetes: File manifes YAML (comic-deployment.yaml) disiapkan untuk mendefinisikan objek Deployment dan Service yang diperlukan.
+- Manifes Kubernetes: File manifes YAML (comic-deployment.yaml) disiapkan untuk mendefinisikan objek Deployment dan Service yang diperlukan.
 
-Deployment: Manifes diaplikasikan ke Cluster Kubernetes untuk memulai proses deployment.
+- Deployment: Manifes diaplikasikan ke Cluster Kubernetes untuk memulai proses deployment.
 
-Pengujian: Aplikasi yang sudah berjalan diuji melalui NodePort yang telah ditentukan pada Service.
+- Pengujian: Aplikasi yang sudah berjalan diuji melalui NodePort yang telah ditentukan pada Service.
 
-Berikut hasil Implementasi yang saya lakukan
+## Cara melakukan Deployment di Kubernetes
 
 1. Menyiapkan file konfigurasi di server
 ```bash
@@ -59,7 +59,7 @@ kubectl apply -f comic-deployment.yaml
 kubectl get all
 ```
 
-5. Karena saya menggunakan Type Service Node Port maka saya akan akses ke Port 30002 seperti di file konfig saya
+5. Karena saya menggunakan Type Service Node Port maka saya akan akses ke Port 30002 seperti di file konfig saya, Untuk layanan Kubernetes saya menggunakan Playground KodeKloud untuk melakukan uji coba Production dan Implementasi sederhana. Visit ke website ini guys free main kubernetes buat device yang ga kuat https://kodekloud.com/studio/playgrounds/kubernetes/
 
 ## Documentation
 
@@ -93,4 +93,4 @@ replicaset.apps/comic-deployment-7c8bb954d   3         3         3       35s
 ![image-documentation-1](./image/image.png)
 
 4. Login menggunakan user admin yang ada di Lovable Cloud
-![image-documentation-2](./image/image-2.png)
+![image-documentation-2](./image/image2.png)

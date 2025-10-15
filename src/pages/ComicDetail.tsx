@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Star, BookOpen, User } from "lucide-react";
+import { Star, BookOpen, User, Palette } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 
@@ -16,9 +16,11 @@ interface Comic {
   description: string;
   cover_url: string | null;
   author: string;
+  artist: string | null;
   rating: number;
   status: string;
   genre_id: string | null;
+  comic_genres?: { genres: { name: string } }[];
 }
 
 interface Chapter {
@@ -27,15 +29,12 @@ interface Chapter {
   title: string;
 }
 
-interface Genre {
-  name: string;
-}
 
 const ComicDetail = () => {
   const { slug } = useParams();
   const [comic, setComic] = useState<Comic | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
-  const [genre, setGenre] = useState<Genre | null>(null);
+  
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -48,7 +47,12 @@ const ComicDetail = () => {
     // Fetch comic
     const { data: comicData, error: comicError } = await supabase
       .from("comics")
-      .select("*")
+      .select(`
+        *,
+        comic_genres (
+          genres ( name )
+        )
+      `)
       .eq("slug", slug)
       .single();
 
@@ -68,16 +72,6 @@ const ComicDetail = () => {
 
     setChapters(chaptersData || []);
 
-    // Fetch genre
-    if (comicData.genre_id) {
-      const { data: genreData } = await supabase
-        .from("genres")
-        .select("name")
-        .eq("id", comicData.genre_id)
-        .single();
-
-      setGenre(genreData);
-    }
 
     setLoading(false);
   };
@@ -142,11 +136,19 @@ const ComicDetail = () => {
                 <Star className="h-4 w-4 fill-primary text-primary" />
                 {comic.rating}
               </Badge>
-              {genre && <Badge>{genre.name}</Badge>}
+              {(comic as any).comic_genres?.map((cg: any, idx: number) => (
+                <Badge key={idx}>{cg.genres?.name}</Badge>
+              ))}
               <Badge variant="outline" className="flex items-center gap-1">
                 <User className="h-3 w-3" />
                 {comic.author}
               </Badge>
+              {comic.artist && (
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <Palette className="h-3 w-3" />
+                  {comic.artist}
+                </Badge>
+              )}
             </div>
 
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">

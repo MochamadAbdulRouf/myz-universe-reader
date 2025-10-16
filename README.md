@@ -1,12 +1,11 @@
 # Welcome to Lovable project
 This Project Manage By Lovable and Mochamad Abdul Rouf\
 
-<p align="left">
+<p align="center">
   <img src="https://skillicons.dev/icons?i=vite" alt="Vite" />
   <img src="https://skillicons.dev/icons?i=react" alt="React" />
   <img src="https://skillicons.dev/icons?i=typescript" alt="TypeScript" />
   <img src="https://skillicons.dev/icons?i=tailwindcss" alt="Tailwind CSS" />
-  <img src="https://img.shields.io/badge/shadcn/ui-000000?style=flat&logoColor=white&labelColor=000000&color=000000&message=" alt="shadcn-ui" />
   <img src="https://skillicons.dev/icons?i=supabase" alt="Supabase" />
   <img src="https://skillicons.dev/icons?i=docker" alt="Docker" />
   <img src="https://skillicons.dev/icons?i=kubernetes" alt="Kubernetes" />

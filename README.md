@@ -1,5 +1,5 @@
 # Welcome to Lovable project
-This Project Manage By Lovable and Mochamad Abdul Rouf\
+This Project Manage By Lovable and Mochamad Abdul Rouf
 
 <p align="center">
   <img src="https://skillicons.dev/icons?i=vite" alt="Vite" />

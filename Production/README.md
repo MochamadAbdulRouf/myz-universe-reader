@@ -137,3 +137,6 @@ controlplane ~/Production ➜  kubectl logs comic-deployment-7c8bb954d-4xgws
 
 
 gacorr cuyy anak IT banget
+
+Klik link berikut untuk melihat implementasi keamanan Aplikasi menggunakan Objek Secret pada Kubernetes Production
+https://github.com/MochamadAbdulRouf/myz-universe-reader/tree/main/Production/secure-config 

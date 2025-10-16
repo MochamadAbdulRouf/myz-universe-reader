@@ -51,6 +51,9 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- Backend/Database: Supabase (dikelola melalui layanan eksternal Lovable Cloud)
+- Containerization: Docker
+- Orchestration: Kubernetes
 
 ## How To Containerization this Application
 

@@ -1,0 +1,54 @@
+
+apiVersion: v1 
+kind: Secret
+metadata:
+  name: comic-secret
+stringData:
+  VITE_SUPABASE_PROJECT_ID: "nurpudorwottgiffizac"
+  VITE_SUPABASE_PUBLISHABLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51cnB1ZG9yd290dGdpZmZpemFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MTA4MDIsImV4cCI6MjA3NTQ4NjgwMn0.3N9GgigDy9QToWBfN_C-K1zNFCHJkZPajNR0tXDGtmA"
+  VITE_SUPABASE_URL: "https://nurpudorwottgiffizac.supabase.co"
+
+--- 
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comic-deployment
+  labels:
+    app: comic-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: comic-app
+  template:
+    metadata:
+      labels:
+        app: comic-app
+      annotations:
+        developer: mochabdulrouf 
+        mode: production
+    spec:
+      containers:
+        - name: comic-container
+          image: mochabdulrouf/react-comic-app:3.1-production-secure
+          ports:
+            - containerPort: 80
+          envFrom:
+            - secretRef:
+                name: comic-secret
+            
+---
+
+apiVersion: v1 
+kind: Service
+metadata:
+  name: comic-service
+spec:
+  type: NodePort
+  selector:
+    app: comic-app
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30002

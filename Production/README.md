@@ -1,6 +1,9 @@
 # Aplikasi Comic Reader
 Proses deployment untuk aplikasi Comic Reader.
 
+## TOPOLOGI PROJECT
+![topologi-project-non-secure](./image/topologi-production-non-secure.jpeg)
+
 1. Ringkasan Proyek
 Aplikasi ini adalah sebuah platform pembaca komik berbasis web yang dibangun dengan antarmuka pengguna modern dan interaktif.
 

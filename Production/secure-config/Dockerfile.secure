@@ -1,0 +1,26 @@
+# --- Tahap Build ---
+FROM node:18-alpine as builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+# --- Tahap Produksi ---
+FROM nginx:stable-alpine
+
+# Salin file statis dari tahap build
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# ----------------- PERUBAHAN DI SINI -----------------
+
+# Salin skrip entrypoint ke dalam image
+COPY entrypoint.sh /entrypoint.sh
+
+# Beri izin eksekusi lagi di dalam image (sebagai jaminan)
+RUN chmod +x /entrypoint.sh
+
+# Jalankan skrip entrypoint sebagai perintah utama container
+CMD ["/entrypoint.sh"]
+
+# ----------------------------------------------------

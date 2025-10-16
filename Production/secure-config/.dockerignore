@@ -1,0 +1,4 @@
+# Jangan copy file ini
+.env
+.env.*
+node_modules

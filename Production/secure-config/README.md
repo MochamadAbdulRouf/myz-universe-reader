@@ -145,8 +145,6 @@ CONTAINER ID   IMAGE                                                 COMMAND    
 
 7. Saya melakukan push ke Docker Hub
 ```bash
-Push ke Docker Hub :
-```bash
 rouf@docker-client:~/myz-universe-reader$ docker push mochabdulrouf/react-comic-app:3.1-production-secure 
 The push refers to repository [docker.io/mochabdulrouf/react-comic-app]
 aa67cd9f888a: Pushed

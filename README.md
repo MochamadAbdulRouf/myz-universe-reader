@@ -3,28 +3,26 @@ This Project Manage By Lovable and Mochamad Abdul Rouf\
 
 <p align="center">
   <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-    <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
+    <img src="https://skillicons.dev/icons?i=vite" alt="Vite" />
   </a>
   <a href="https://reactjs.org/" target="_blank" rel="noreferrer">
-    <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
+    <img src="https://skillicons.dev/icons?i=react" alt="React" />
   </a>
   <a href="https://www.typescriptlang.org/" target="_blank" rel="noreferrer">
-    <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+    <img src="https://skillicons.dev/icons?i=typescript" alt="TypeScript" />
   </a>
   <a href="https://tailwindcss.com/" target="_blank" rel="noreferrer">
-    <img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+    <img src="https://skillicons.dev/icons?i=tailwindcss" alt="Tailwind CSS" />
   </a>
-  <a href="https://ui.shadcn.com/" target="_blank" rel="noreferrer">
-    <img src="https://img.shields.io/badge/shadcn/ui-000000?style=for-the-badge&logo=shadcnui&logoColor=white" alt="shadcn-ui" />
-  </a>
+    <img src="https://img.shields.io/badge/shadcn/ui-000000?style=flat&logoColor=white&labelColor=000000&color=000000&message=" alt="shadcn-ui" />
   <a href="https://supabase.com" target="_blank" rel="noreferrer">
-    <img src="https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
+    <img src="https://skillicons.dev/icons?i=supabase" alt="Supabase" />
   </a>
   <a href="https://www.docker.com/" target="_blank" rel="noreferrer">
-    <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
+    <img src="https://skillicons.dev/icons?i=docker" alt="Docker" />
   </a>
   <a href="https://kubernetes.io" target="_blank" rel="noreferrer">
-    <img src="https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white" alt="Kubernetes" />
+    <img src="https://skillicons.dev/icons?i=kubernetes" alt="Kubernetes" />
   </a>
 </p>
 

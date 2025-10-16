@@ -103,7 +103,7 @@ docker pull mochabdulrouf/react-comic-app:2.0-development
 docker run -d -p 8080:8080 --name name-container mochabdulrouf/react-comic-app:2.0-development
 ```
 
-### Visit to Production for my Kubernetes Project
+### Visit the Production Version for my Kubernetes Project
 https://github.com/MochamadAbdulRouf/myz-universe-reader/tree/main/Production 
 
 EST. 2025 

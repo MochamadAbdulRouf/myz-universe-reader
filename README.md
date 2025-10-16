@@ -1,29 +1,15 @@
 # Welcome to Lovable project
 This Project Manage By Lovable and Mochamad Abdul Rouf\
 
-<p align="center">
-  <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-    <img src="https://skillicons.dev/icons?i=vite" alt="Vite" />
-  </a>
-  <a href="https://reactjs.org/" target="_blank" rel="noreferrer">
-    <img src="https://skillicons.dev/icons?i=react" alt="React" />
-  </a>
-  <a href="https://www.typescriptlang.org/" target="_blank" rel="noreferrer">
-    <img src="https://skillicons.dev/icons?i=typescript" alt="TypeScript" />
-  </a>
-  <a href="https://tailwindcss.com/" target="_blank" rel="noreferrer">
-    <img src="https://skillicons.dev/icons?i=tailwindcss" alt="Tailwind CSS" />
-  </a>
-    <img src="https://img.shields.io/badge/shadcn/ui-000000?style=flat&logoColor=white&labelColor=000000&color=000000&message=" alt="shadcn-ui" />
-  <a href="https://supabase.com" target="_blank" rel="noreferrer">
-    <img src="https://skillicons.dev/icons?i=supabase" alt="Supabase" />
-  </a>
-  <a href="https://www.docker.com/" target="_blank" rel="noreferrer">
-    <img src="https://skillicons.dev/icons?i=docker" alt="Docker" />
-  </a>
-  <a href="https://kubernetes.io" target="_blank" rel="noreferrer">
-    <img src="https://skillicons.dev/icons?i=kubernetes" alt="Kubernetes" />
-  </a>
+<p align="left">
+  <img src="https://skillicons.dev/icons?i=vite" alt="Vite" />
+  <img src="https://skillicons.dev/icons?i=react" alt="React" />
+  <img src="https://skillicons.dev/icons?i=typescript" alt="TypeScript" />
+  <img src="https://skillicons.dev/icons?i=tailwindcss" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/shadcn/ui-000000?style=flat&logoColor=white&labelColor=000000&color=000000&message=" alt="shadcn-ui" />
+  <img src="https://skillicons.dev/icons?i=supabase" alt="Supabase" />
+  <img src="https://skillicons.dev/icons?i=docker" alt="Docker" />
+  <img src="https://skillicons.dev/icons?i=kubernetes" alt="Kubernetes" />
 </p>
 
 ## How can I edit this code?

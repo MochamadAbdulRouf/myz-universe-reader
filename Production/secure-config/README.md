@@ -252,3 +252,145 @@ PWD=/
 
 14. Test Pengujian login ke database external
 ![test-pengujian-2](./image/image-secure-1.png)
+
+## Implementasi Blue Green Deployment 
+Implementasi ini bertujuan agar update aplikasi terbaru masuk ke deployment blue dulu, lalu kita implementasikan deployment green dengan zero user yg mengaksesnya dan memastikan tidak ada bug di update aplikasi terbaru. nanti ketika sudah selesai tinggal kita alihkan traffic semua user ke deployment green.
+
+1. Buat namespace baru bernama `blue-green`
+```bash
+kubectl create ns blue-green
+```
+
+2. edit file manifest `comic-deployment-secure.yaml` seperti ini, ganti semua label menjadi blue.
+```bash
+
+apiVersion: v1 
+kind: Secret
+metadata:
+  name: comic-secret
+stringData:
+  VITE_SUPABASE_PROJECT_ID: "nurpudorwottgiffizac"
+  VITE_SUPABASE_PUBLISHABLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51cnB1ZG9yd290dGdpZmZpemFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MTA4MDIsImV4cCI6MjA3NTQ4NjgwMn0.3N9GgigDy9QToWBfN_C-K1zNFCHJkZPajNR0tXDGtmA"
+  VITE_SUPABASE_URL: "https://nurpudorwottgiffizac.supabase.co"
+
+--- 
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comic-deployment
+  labels:
+    app: blue
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: blue 
+  template:
+    metadata:
+      labels:
+        app: blue 
+      annotations:
+        developer: mochabdulrouf 
+        mode: production
+    spec:
+      containers:
+        - name: comic-container
+          image: mochabdulrouf/react-comic-app:3.1-production-secure
+          ports:
+            - containerPort: 80
+          envFrom:
+            - secretRef:
+                name: comic-secret
+            
+---
+
+apiVersion: v1 
+kind: Service
+metadata:
+  name: svc-blue-green # implementasi blue green deployment nama servicenya aku ubah yaa
+spec:
+  type: NodePort
+  selector:
+    app: blue 
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30002
+```
+
+3. Lakukan blue deployment terlebih dahulu 
+```
+kubectl -n blue-green apply -f comic-deployment-secure.yaml
+```
+
+4. Buat file manifest untuk green deployment
+```bash 
+cp comic-deployment-secure.yaml comic-deployment-secure-update.yml
+```
+
+5. edit file manifest `comic-deployment-secure-update.yml`, ubah nama deployment menjadi `comic-deployment-update`, lalu ganti label tadinya `blue` jadi `green` dan hapus bagian service
+```
+apiVersion: v1 
+kind: Secret
+metadata:
+  name: comic-secret
+stringData:
+  VITE_SUPABASE_PROJECT_ID: "nurpudorwottgiffizac"
+  VITE_SUPABASE_PUBLISHABLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im51cnB1ZG9yd290dGdpZmZpemFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk5MTA4MDIsImV4cCI6MjA3NTQ4NjgwMn0.3N9GgigDy9QToWBfN_C-K1zNFCHJkZPajNR0tXDGtmA"
+  VITE_SUPABASE_URL: "https://nurpudorwottgiffizac.supabase.co"
+
+--- 
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comic-deployment-update
+  labels:
+    app: green 
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: green
+  template:
+    metadata:
+      labels:
+        app: green 
+      annotations:
+        developer: mochabdulrouf 
+        mode: production
+    spec:
+      containers:
+        - name: comic-container
+          image: mochabdulrouf/react-comic-app:3.1-production-secure
+          ports:
+            - containerPort: 80
+          envFrom:
+            - secretRef:
+                name: comic-secret
+```
+
+6. Lakukan green deployment
+```bash
+kubectl -n blue-green apply -f comic-deployment-secure-update.yml
+```
+
+7. Verify semua deployment sedang berjalan, blue deployment masih berguna untuk rollback ketika terjadi bug di green deployment.
+```bash
+kubectl -n blue-green get deploy
+```
+example:
+```bash
+root@rouf:~/myz-universe-reader/Production/secure-config# k -n blue-green get deploy
+NAME                      READY   UP-TO-DATE   AVAILABLE   AGE
+comic-deployment          3/3     3            3           20m
+comic-deployment-update   3/3     3            3           17m
+```
+
+8. Ketika green deployment sudah berjalan, ubah traffic service `svc-blue-green`
+```bash
+kubectl -n blue-green edit svc svc-blue-green
+```
+then
+![change](./image/ss-change.png)

@@ -396,3 +396,128 @@ then
 ![change](./image/ss-change.png)
 
 9. Jika ingin rollback tinggal alihkan service selector ke target label `blue`
+
+## Implementasi Canary Deployment 
+
+note: untuk canary deployment, pada deployment pertama saya menggunakan image aplikasi comic dan deployment canarynya saya pakai web server apache default. supaya bisa membedakan traffic hasil live curl nanti.
+1. Membuat namespace khusus canary 
+```bash
+kubectl create ns canary
+```
+
+2. Saya mengubah nama deployment dan label serta service menjadi seperti berikut 
+```bash
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main
+  labels:
+    app: main
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: main
+  template:
+    metadata:
+      labels:
+        app: main
+      annotations:
+        developer: mochabdulrouf
+        mode: production
+    spec:
+      containers:
+        - name: comic-container
+          image: mochabdulrouf/react-comic-app:3.1-production-secure
+          ports:
+            - containerPort: 80
+          envFrom:
+            - secretRef:
+                name: comic-secret
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: main-service
+spec:
+  type: NodePort
+  selector:
+    app: main
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30005
+```
+
+3. Melakukan deployment pertama 
+```bash
+kubectl -n canary apply -f comic-deployment-secure.yaml 
+```
+
+4. Di implementasi ini, saya mengubah nama deployment, image menjadi httpd dan replica setnya menjadi 1, dan menghapus service. 
+```bash
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: canary
+  labels:
+    app: canary
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: main # di bedakan karena target service hanya ke labels main, jadi nanti service akan membagi traffic ke web comic dan apache default 
+  template:
+    metadata:
+      labels:
+        app: main #
+      annotations:
+        developer: mochabdulrouf
+        mode: production
+    spec:
+      containers:
+        - name: comic-container
+          image: httpd
+          ports:
+            - containerPort: 80
+          envFrom:
+            - secretRef:
+                name: comic-secret
+```
+
+5. lalu lakukan canary deployment 
+```bash
+kubectl -n canary apply -f comic-deployment-secure-update.yml 
+```
+
+7. Untuk melihat traffic yang di distribusikan secara live bisa menggunakan command berikut 
+```bash
+watch -n 1 curl IP:NODEPORT 
+```
+example 
+```bash
+watch -n 1 curl 192.168.1.1:30008
+```
+note: jadi saat ini ada 3 pods `comic` dan 1 pods `apache` total pods ada 4, maka 100% traffic akan dibagi menjadi 75% ke pod `main(comic)` dan 25% ke pods `canary(apache)` 
+
+8. sebenarnya untuk canary deployment hanya 10% user yg bisa akses deployment `canary` dan 90% user masih mengakses deployment `main`, yang nantinya akan di tingkatkan secara bertahap ke deployment `canary` (10% -> 25% -> 50% -> 75% -> 100%). jadi kita ubah aja replica untuk main sekarang menjadi `9 pods`.
+
+9. tambahkan replica deployment main
+```bash
+kubectl scale deployment main --replicas 9 
+```
+example:
+```bash
+root@rouf:~/myz-universe-reader/Production/secure-config# kubectl -n canary scale deployment main --replicas 9
+deployment.apps/main scaled
+root@rouf:~/myz-universe-reader/Production/secure-config# k -n canary get deploy -o wide
+NAME     READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS        IMAGES                                                SELECTOR
+canary   1/1     1            1           19h   comic-container   httpd                                                 app=main
+main     9/9     9            9           19h   comic-container   mochabdulrouf/react-comic-app:3.1-production-secure   app=main
+```
+dan lakukan pemantuan traffic menggunakan curl secara live setiap 1 detik sekali
+```bash
+watch -n 1 curl IP:NODEPORT 
+```

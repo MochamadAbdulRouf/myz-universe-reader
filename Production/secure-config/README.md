@@ -394,3 +394,5 @@ kubectl -n blue-green edit svc svc-blue-green
 ```
 then
 ![change](./image/ss-change.png)
+
+9. Jika ingin rollback tinggal alihkan service selector ke target label `blue`
